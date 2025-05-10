@@ -1,0 +1,3 @@
+package authservice
+
+func NewGPRCServer() {}

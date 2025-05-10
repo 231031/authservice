@@ -1,0 +1,17 @@
+syntax = "proto3";
+package proto;
+
+option go_package = "./pb";
+
+message PostAuthRequest {
+    string auth_code = 1;
+    string role = 2;
+}
+
+message PostAuthResponse {
+    string token = 1;
+}
+
+service AuthService {
+    rpc PostAuth (PostAuthRequest) returns (PostAuthResponse) {}
+}

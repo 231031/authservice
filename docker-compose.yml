@@ -1,0 +1,20 @@
+services:
+  auth-db:
+    image: postgresql:17.5-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=${}
+      - POSTGRES_USER=${}
+      - POSTGRES_DB=${}
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    environment:
+      - ADMINER_DEFAULT_SERVER=auth-db
+      
