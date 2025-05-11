@@ -2,16 +2,17 @@ package authservice
 
 import (
 	"log"
+	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	getUserbySub(sub string) (*User, error)
-	createUser(user *User) (*User, error)
-	updateRefreshToken(id, refresh_token string) error
+	getUserbySub(sub string) (*Auth, error)
+	getUserbyId(id string) (*Auth, error)
+	createUser(user *Auth) (*Auth, error)
+	updateRefresh(id, refresh_token string, expire_in time.Time) error
 }
 
 type repository struct {
@@ -30,30 +31,39 @@ func NewRepository(url string) Repository {
 	return &repository{db: db, errLog: l}
 }
 
-func (r *repository) createUser(user *User) (*User, error) {
-	id := uuid.New().String()
-	user.id = id
-
-	resp := r.db.Create(user)
+func (r *repository) createUser(authInfo *Auth) (*Auth, error) {
+	resp := r.db.Create(authInfo)
 	if resp.Error != nil {
 		r.errLog.Println(resp.Error)
 		return nil, resp.Error
 	}
-	return user, nil
+	return authInfo, nil
 }
 
-func (r *repository) getUserbySub(sub string) (*User, error) {
-	user := &User{}
-	resp := r.db.Where(&User{sub: sub}).First(user)
+func (r *repository) getUserbySub(sub string) (*Auth, error) {
+	authInfo := &Auth{}
+	resp := r.db.Where(&Auth{Sub: sub}).First(authInfo)
 	if resp.Error != nil {
 		r.errLog.Println(resp.Error)
 		return nil, resp.Error
 	}
-	return user, nil
+	return authInfo, nil
 }
 
-func (r *repository) updateRefreshToken(id, refresh_token string) error {
-	resp := r.db.Model(&User{id: id}).Update("refresh_token", refresh_token)
+func (r *repository) getUserbyId(id string) (*Auth, error) {
+	authInfo := &Auth{}
+	resp := r.db.Where(&Auth{Id: id}).First(authInfo)
+	if resp.Error != nil {
+		r.errLog.Println(resp.Error)
+		return nil, resp.Error
+	}
+	return authInfo, nil
+}
+
+func (r *repository) updateRefresh(id, refresh_token string, expire_in time.Time) error {
+	resp := r.db.Model(&Auth{Id: id}).Updates(
+		Auth{RefreshToken: refresh_token, ExpiresIn: expire_in},
+	)
 	if resp.Error != nil {
 		r.errLog.Println(resp.Error)
 		return nil

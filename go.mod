@@ -3,6 +3,7 @@ module github.com/231031/authservice
 go 1.23.1
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.6.0
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
